@@ -4,6 +4,7 @@ public class Solver {
     private Board initialBoard;
     private List<Board> visitedBoard;
     private Random random = new Random();
+    public int heuristik = 1;
 
     public Solver(Board initialBoard) {
         this.initialBoard = initialBoard;
@@ -19,9 +20,25 @@ public class Solver {
         if (method.equalsIgnoreCase("UCS")) {
             q = new PriorityQueue<>(Comparator.comparingInt(Board::getCost));
         } else if (method.equalsIgnoreCase("A*")) {
-            q = new PriorityQueue<>(Comparator.comparingInt(b -> b.getCost() + b.heuristik()));
+            switch (heuristik) {
+                case 1 -> q = new PriorityQueue<>(Comparator.comparingInt(b -> b.getCost() + b.heuristik()));
+                case 2 -> q = new PriorityQueue<>(Comparator.comparingInt(b -> b.getCost() + b.heuristik_2()));
+                case 3 -> q = new PriorityQueue<>(Comparator.comparingInt(b -> b.getCost() + b.heuristik_3()));
+                default -> {
+                    System.out.println("Unknown heuristic for A*.");
+                    return null;
+                }
+            }
         } else if (method.equalsIgnoreCase("GBFS")) {
-            q = new PriorityQueue<>(Comparator.comparingInt(Board::heuristik));
+            switch (heuristik) {
+                case 1 -> q = new PriorityQueue<>(Comparator.comparingInt(Board::heuristik));
+                case 2 -> q = new PriorityQueue<>(Comparator.comparingInt(Board::heuristik_2));
+                case 3 -> q = new PriorityQueue<>(Comparator.comparingInt(Board::heuristik_3));
+                default -> {
+                    System.out.println("Unknown heuristic for GBFS.");
+                    return null;
+                }
+            }
         } else {
             System.out.println("Unknown method: " + method);
             return null;
@@ -84,7 +101,16 @@ public class Solver {
             if (children.isEmpty()) break;
 
             Board next = randomChild(children);
-            int delta = current.heuristik() - next.heuristik();
+            int delta;
+            switch (heuristik) {
+                case 1 -> delta = current.heuristik() - next.heuristik();
+                case 2 -> delta = current.heuristik() - next.heuristik_2();
+                case 3 -> delta = current.heuristik() - next.heuristik_3();
+                default -> {
+                    System.out.println("Unknown heuristic for SA.");
+                    return null;
+                }
+            }
 
             if (delta > 0) {
                 current = next;
@@ -95,7 +121,7 @@ public class Solver {
                 }
             }
 
-            temperature *= (1 - coolingRate); // cooling schedule
+            temperature *= (1 - coolingRate); // cooling
         }
 
         System.out.println("No solution found using Simulated Annealing.");

@@ -3,6 +3,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
+        // Make Initial Board
         int width = 6;
         int height = 6;
         char[][] grid = {
@@ -14,7 +15,7 @@ public class Main {
             {'L', 'L', 'J', 'M', 'M', '.'}
         };
 
-        Coor exit = new Coor(2, 5); // baris 2, kolom 5
+        Coor exit = new Coor(2, 5); // char[2][5]
 
         List<Car> cars = new ArrayList<>();
         cars.add(new Car('P', new Coor(2, 1), new Coor(2, 2))); // horizontal (baris tetap)
@@ -36,7 +37,9 @@ public class Main {
         System.out.println("Initial Board:");
         board.debugBoard();
 
-        System.out.println("Heuristic estimate to goal: " + board.heuristik());
+        System.out.println("Heuristik 1 estimate to goal: " + board.heuristik());
+        System.out.println("Heuristik 2 estimate to goal: " + board.heuristik_2());
+        System.out.println("Heuristik 3 estimate to goal: " + board.heuristik_3());
 
         if (board.isGoal()) {
             System.out.println("Already at goal!");
@@ -44,10 +47,17 @@ public class Main {
             System.out.println("Not at goal yet.");
         }
 
+        // SOLVER
         Solver s = new Solver(board);
-        List<Board> res = s.solving("SA");
+        // s.heuristik = 2; // set heuristik
+
+        // Choose method
+        // List<Board> res = s.solving("SA");
+        List<Board> res = s.solving("UCS");
         // List<Board> res = s.solving("A*");
         // List<Board> res = s.solving("GBFS");
+
+        // Result
         if (res != null) {
             for (Board b : res) {
                 b.debugBoard();
