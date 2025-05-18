@@ -45,7 +45,7 @@ public class Main {
         }
 
         Solver s = new Solver(board);
-        List<Board> res = s.solving("UCS");
+        List<Board> res = s.solving("SA");
         // List<Board> res = s.solving("A*");
         // List<Board> res = s.solving("GBFS");
         if (res != null) {

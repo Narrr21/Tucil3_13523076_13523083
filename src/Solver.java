@@ -3,6 +3,7 @@ import java.util.*;
 public class Solver {
     private Board initialBoard;
     private List<Board> visitedBoard;
+    private Random random = new Random();
 
     public Solver(Board initialBoard) {
         this.initialBoard = initialBoard;
@@ -10,6 +11,10 @@ public class Solver {
     }
 
     public List<Board> solving(String method) {
+        if (method.equalsIgnoreCase("SA")) {
+            return simulatedAnnealing();
+        }
+
         PriorityQueue<Board> q;
         if (method.equalsIgnoreCase("UCS")) {
             q = new PriorityQueue<>(Comparator.comparingInt(Board::getCost));
@@ -21,6 +26,7 @@ public class Solver {
             System.out.println("Unknown method: " + method);
             return null;
         }
+
         q.add(initialBoard);
 
         while (!q.isEmpty()) {
@@ -28,8 +34,6 @@ public class Solver {
 
             if (isVisited(current)) continue;
             visitedBoard.add(current);
-            // System.out.println("Curretnly visit : ");
-            // current.debugBoard();
 
             if (current.isGoal()) {
                 System.out.println("Solution found!");
@@ -37,10 +41,7 @@ public class Solver {
             }
 
             for (Board child : current.generateChild()) {
-                // System.out.println("Current child : ");
-                // child.debugBoard();
                 if (!isVisited(child)) {
-                    // System.out.println("Child added");
                     q.add(child);
                 }
             }
@@ -61,12 +62,47 @@ public class Solver {
 
     private List<Board> buildPath(Board current) {
         List<Board> path = new ArrayList<>();
-
         while (current != null) {
             path.add(0, current);
             current = current.getParent();
         }
-
         return path;
+    }
+
+    private List<Board> simulatedAnnealing() {
+        Board current = initialBoard;
+        double temperature = 1000.0;
+        double coolingRate = 0.003;
+
+        while (temperature > 1e-3) {
+            if (current.isGoal()) {
+                System.out.println("Solution found with Simulated Annealing!");
+                return buildPath(current);
+            }
+
+            List<Board> children = current.generateChild();
+            if (children.isEmpty()) break;
+
+            Board next = randomChild(children);
+            int delta = current.heuristik() - next.heuristik();
+
+            if (delta > 0) {
+                current = next;
+            } else {
+                double probability = Math.exp(delta / temperature);
+                if (random.nextDouble() < probability) {
+                    current = next;
+                }
+            }
+
+            temperature *= (1 - coolingRate); // cooling schedule
+        }
+
+        System.out.println("No solution found using Simulated Annealing.");
+        return null;
+    }
+
+    private Board randomChild(List<Board> children) {
+        return children.get(random.nextInt(children.size()));
     }
 }

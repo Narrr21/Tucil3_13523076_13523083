@@ -99,6 +99,18 @@ public class Board {
         }
     }
 
+    public int heuristik_2() {
+        // jumlah "berat" mobil yang menjadi penghalang, jika bisa digeser bernilai -1, jika tidak bernilai -3
+        // TO BE IMPLEMENTED
+        return 0;
+    }
+
+    public int heuristik_3() {
+        // jumlah blocking 2 tingkat, blocking mobil primary + blocking mobil yang memblocking primary
+        // TO BE IMPLEMENTED
+        return 0;
+    }
+
     public List<Board> generateChild() {
         List<Board> children = new ArrayList<>();
         int border = Math.max(width, height);
@@ -139,33 +151,33 @@ public class Board {
         return children;
     }
 
-private void updateBoard(char[][] board, Car oldCar, Car newCar) {
-    // Clear old car
-    if (oldCar.getDirection() == 'X') {
-        int y = oldCar.getStart().Y;
-        for (int x = oldCar.getStart().X; x <= oldCar.getEnd().X; x++) {
-            board[y][x] = '.';
+    private void updateBoard(char[][] board, Car oldCar, Car newCar) {
+        // Clear old car
+        if (oldCar.getDirection() == 'X') {
+            int y = oldCar.getStart().Y;
+            for (int x = oldCar.getStart().X; x <= oldCar.getEnd().X; x++) {
+                board[y][x] = '.';
+            }
+        } else {
+            int x = oldCar.getStart().X;
+            for (int y = oldCar.getStart().Y; y <= oldCar.getEnd().Y; y++) {
+                board[y][x] = '.';
+            }
         }
-    } else {
-        int x = oldCar.getStart().X;
-        for (int y = oldCar.getStart().Y; y <= oldCar.getEnd().Y; y++) {
-            board[y][x] = '.';
-        }
-    }
 
-    // Draw new car
-    if (newCar.getDirection() == 'X') {
-        int y = newCar.getStart().Y;
-        for (int x = newCar.getStart().X; x <= newCar.getEnd().X; x++) {
-            board[y][x] = newCar.getSymbol();
-        }
-    } else {
-        int x = newCar.getStart().X;
-        for (int y = newCar.getStart().Y; y <= newCar.getEnd().Y; y++) {
-            board[y][x] = newCar.getSymbol();
+        // Draw new car
+        if (newCar.getDirection() == 'X') {
+            int y = newCar.getStart().Y;
+            for (int x = newCar.getStart().X; x <= newCar.getEnd().X; x++) {
+                board[y][x] = newCar.getSymbol();
+            }
+        } else {
+            int x = newCar.getStart().X;
+            for (int y = newCar.getStart().Y; y <= newCar.getEnd().Y; y++) {
+                board[y][x] = newCar.getSymbol();
+            }
         }
     }
-}
 
     public boolean canMove(Car car, int step) {
         Coor start = car.getStart();
