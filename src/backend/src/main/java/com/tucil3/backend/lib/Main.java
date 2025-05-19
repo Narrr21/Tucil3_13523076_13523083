@@ -54,7 +54,7 @@ public class Main {
 
         // Choose method
         // List<Board> res = s.solving("SA");
-        List<Board> res = s.solving("UCS");
+        List<Board> res = s.solving("UCS", 2);
         // List<Board> res = s.solving("A*");
         // List<Board> res = s.solving("GBFS");
 

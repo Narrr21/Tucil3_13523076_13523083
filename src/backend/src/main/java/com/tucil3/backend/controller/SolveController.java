@@ -1,15 +1,19 @@
 package com.tucil3.backend.controller;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tucil3.backend.lib.*;
-
-import java.util.*;
+import com.tucil3.backend.lib.Board;
+import com.tucil3.backend.lib.Coor;
+import com.tucil3.backend.lib.Solver;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -80,7 +84,7 @@ public class SolveController {
 
         // Solve the board
         Solver solver = new Solver(board);
-        List<Board> resultBoards = solver.solving("A*");
+        List<Board> resultBoards = solver.solving("A*", 3);
         if (resultBoards == null) {
             return ResponseEntity.ok("Solution not found!");
         }

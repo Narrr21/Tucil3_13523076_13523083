@@ -1,18 +1,27 @@
 package com.tucil3.backend.lib;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Random;
 
 public class Solver {
     private final Board initialBoard;
     private List<Board> visitedBoard;
     private final Random random = new Random();
-    public final int heuristik = 1;
+    public int heuristik = 1;
 
     public Solver(Board initialBoard) {
         this.initialBoard = initialBoard;
         this.visitedBoard = new ArrayList<>();
     }
 
-    public List<Board> solving(String method) {
+    public List<Board> solving(String method, int heur) {
+        if (!validSetup()) {
+            return null;
+        }
+        heuristik = heur;
+
         if (method.equalsIgnoreCase("SA")) {
             return simulatedAnnealing();
         }
@@ -78,12 +87,48 @@ public class Solver {
         return false;
     }
 
+    public boolean validSetup() {
+        Coor ex = initialBoard.getExit();
+        Coor pr = null;
+        char direction = ' ';
+        for (Car car: initialBoard.getCars()) {
+            if (car.getSymbol() == 'P') {
+                pr = car.getStart();
+                direction = car.getDirection();
+                break;
+            }
+        }
+        if (pr == null) {return false;}
+        if (direction == 'X') {
+            if (!(ex.X == -1 || ex.X == initialBoard.getWidth())) {
+                return false;
+            }
+            if (!(ex.Y == pr.Y)) {
+                return false;
+            }
+            ex.X += (ex.X == -1) ? 1 : -1;
+            initialBoard.setExit(ex);
+            return true;
+        } else {
+            if (!(ex.Y == -1 || ex.Y == initialBoard.getWidth())) {
+                return false;
+            }
+            if (!(ex.X == pr.X)) {
+                return false;
+            }
+            ex.Y += (ex.Y == -1) ? 1 : -1;
+            initialBoard.setExit(ex);
+            return true;
+        }
+    }
+
     private List<Board> buildPath(Board current) {
         List<Board> path = new ArrayList<>();
         while (current != null) {
             path.add(0, current);
             current = current.getParent();
         }
+        path.add(path.get(path.size() - 1).withoutPrimary());
         return path;
     }
 

@@ -1,6 +1,8 @@
 package com.tucil3.backend.lib;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Board {
     private final char[][] board;
@@ -8,7 +10,7 @@ public class Board {
     private final int height;
     private final int totalCost;
     private final Board parent;
-    private final Coor exit;
+    private Coor exit;
     private final List<Car> cars;
 
     public Board(char[][] board, Coor exit) {
@@ -54,6 +56,14 @@ public class Board {
         this.parent = null;
     }
 
+    public Coor getExit() {
+        return exit;
+    }
+
+    public void setExit(Coor ex) {
+        this.exit = ex;
+    }
+
     public Board(char[][] board, int totalCost, Board parent, List<Car> cars) {
         this.board = deepCopyBoard(board);
         this.width = board[0].length;
@@ -66,6 +76,14 @@ public class Board {
 
     public char[][] getBoard() {
         return deepCopyBoard(board);
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     public List<Car> getCars() {
@@ -148,15 +166,157 @@ public class Board {
     }
 
     public int heuristik_2() {
-        // jumlah "berat" mobil yang menjadi penghalang, jika bisa digeser bernilai -1, jika tidak bernilai -3
-        // TO BE IMPLEMENTED
-        return 0;
+        Car target = null;
+        for (Car car : cars) {
+            if (car.getSymbol() == 'P') {
+                target = car;
+                break;
+            }
+        }
+
+        if (target == null) return Integer.MAX_VALUE;
+
+        int penalty = 0;
+
+        if (target.getDirection() == 'X') {
+            int y = target.getStart().Y;
+            int x = target.getEnd().X + 1;
+
+            while (x < width) {
+                char cell = board[y][x];
+                if (cell != '.' && cell != target.getSymbol()) {
+                    Car blocker = getCarBySymbol(cell);
+
+                    if (canMove(blocker, 1) || canMove(blocker, -1)) {
+                        penalty -= 1;
+                    } else {
+                        penalty -= 3;
+                    }
+                }
+
+                if (x == exit.X && y == exit.Y) break;
+                x++;
+            }
+
+        } else {
+            int x = target.getStart().X;
+            int y = target.getEnd().Y + 1;
+
+            while (y < height) {
+                char cell = board[y][x];
+                if (cell != '.' && cell != target.getSymbol()) {
+                    Car blocker = getCarBySymbol(cell);
+
+                    if (canMove(blocker, 1) || canMove(blocker, -1)) {
+                        penalty -= 1;
+                    } else {
+                        penalty -= 3;
+                    }
+                }
+
+                if (x == exit.X && y == exit.Y) break;
+                y++;
+            }
+        }
+
+        int distanceToExit = (target.getDirection() == 'X') ?
+                (exit.X - target.getEnd().X) :
+                (exit.Y - target.getEnd().Y);
+
+        return distanceToExit + Math.abs(penalty);
+    }
+
+    private Car getCarBySymbol(char symbol) {
+        for (Car car : cars) {
+            if (car.getSymbol() == symbol) {
+                return car;
+            }
+        }
+        return null;
     }
 
     public int heuristik_3() {
-        // jumlah blocking 2 tingkat, blocking mobil primary + blocking mobil yang memblocking primary
-        // TO BE IMPLEMENTED
-        return 0;
+        Car primary = null;
+        for (Car car : cars) {
+            if (car.getSymbol() == 'P') {
+                primary = car;
+                break;
+            }
+        }
+        if (primary == null) return Integer.MAX_VALUE;
+
+        Set<Character> level1Blockers = new HashSet<>();
+        Set<Character> level2Blockers = new HashSet<>();
+
+        int y = primary.getStart().Y;
+        int x = primary.getEnd().X + 1;
+        if (primary.getDirection() == 'Y') {
+            x = primary.getStart().X;
+            y = primary.getEnd().Y + 1;
+        }
+
+        while (true) {
+            if (x >= width || y >= height) break;
+            char cell = board[y][x];
+            if (cell != '.' && cell != primary.getSymbol()) {
+                level1Blockers.add(cell);
+
+                Car blocker = getCarBySymbol(cell);
+                if (blocker != null) {
+                    List<Coor> path = getPath(blocker, 1);
+                    path.addAll(getPath(blocker, -1));
+
+                    for (Coor p : path) {
+                        p.debugCoor();
+                        char c = board[p.Y][p.X];
+                        if (c != '.' && c != blocker.getSymbol()) {
+                            if (c == 'P') {return Integer.MAX_VALUE;}
+                            level2Blockers.add(c);
+                        }
+                    }
+                }
+            }
+
+            if (x == exit.X && y == exit.Y) break;
+
+            if (primary.getDirection() == 'X') {
+                x++;
+            } else {
+                y++;
+            }
+        }
+
+        System.out.println("Level 1 blockers: " + level1Blockers);
+        System.out.println("Level 2 blockers: " + level2Blockers);
+        
+        // Example scoring: level 1 blockers weighted more heavily than level 2 blockers
+        return level1Blockers.size() * 3 + level2Blockers.size();
+    }
+
+    public List<Coor> getPath(Car car, int step) {
+        List<Coor> path = new ArrayList<>();
+        Coor cursor = step > 0 ? car.getEnd() : car.getStart();
+        char direction = car.getDirection();
+
+        while (true) {
+            int x = cursor.X + (direction == 'X' ? step : 0);
+            int y = cursor.Y + (direction == 'Y' ? step : 0);
+
+            if (x < 0 || y < 0 || x >= width || y >= height) break;
+
+            char cell = board[y][x];
+
+            if (cell != '.' && cell != car.getSymbol()) {
+                // Tambahkan posisi penghalang ke path, supaya bisa dideteksi sebagai level 2 blocker
+                path.add(new Coor(x, y));
+                break;
+            }
+
+            path.add(new Coor(x, y));
+            cursor = new Coor(x, y);
+        }
+
+        return path;
     }
 
     public List<Board> generateChild() {
@@ -229,43 +389,50 @@ public class Board {
     }
 
     public boolean canMove(Car car, int step) {
+        if (step == 0) return true;
+
         Coor start = car.getStart();
         Coor end = car.getEnd();
-        char symbol = car.getSymbol();
         char direction = car.getDirection();
 
         if (direction == 'X') {
-            int newStart = start.X + step;
-            int newEnd = end.X + step;
-
-            if (newStart < 0 || newEnd >= width) return false;
-
             int y = start.Y;
-            int max = Math.max(newEnd, end.X);
-            int min = Math.min(newStart, start.X);
 
-            for (int i = min; i <= max; i++) {
-                if (board[y][i] != '.' && board[y][i] != symbol) return false;
+            if (step > 0) {
+                // Cek sel setelah ujung kanan
+                for (int i = 1; i <= step; i++) {
+                    int newX = end.X + i;
+                    if (newX >= width || board[y][newX] != '.') return false;
+                }
+            } else {
+                // Cek sel sebelum ujung kiri
+                for (int i = 1; i <= -step; i++) {
+                    int newX = start.X - i;
+                    if (newX < 0 || board[y][newX] != '.') return false;
+                }
             }
             return true;
 
         } else if (direction == 'Y') {
-            int newStart = start.Y + step;
-            int newEnd = end.Y + step;
-
-            if (newStart < 0 || newEnd >= height) return false;
-
             int x = start.X;
-            int max = Math.max(newEnd, end.Y);
-            int min = Math.min(newStart, start.Y);
 
-            for (int i = min; i <= max; i++) {
-                if (board[i][x] != '.' && board[i][x] != symbol) return false;
+            if (step > 0) {
+                // Cek sel setelah ujung bawah
+                for (int i = 1; i <= step; i++) {
+                    int newY = end.Y + i;
+                    if (newY >= height || board[newY][x] != '.') return false;
+                }
+            } else {
+                // Cek sel sebelum ujung atas
+                for (int i = 1; i <= -step; i++) {
+                    int newY = start.Y - i;
+                    if (newY < 0 || board[newY][x] != '.') return false;
+                }
             }
             return true;
         }
 
-        return false; // invalid direction
+        return false;
     }
 
 
@@ -281,6 +448,30 @@ public class Board {
         return this.totalCost <= b.totalCost;
     }
 
+    public Board withoutPrimary() {
+        char[][] newBoard = deepCopyBoard(board);
+        List<Car> newCars = deepCopyCars(cars);
+        Car pr = newCars.get(0);
+        for (Car car : newCars) {
+            if (car.getSymbol() == 'P') {
+                pr = car;
+            }
+        }
+        if (pr.getDirection() == 'X') {
+            int y = pr.getStart().Y;
+            for (int x = pr.getStart().X; x <= pr.getEnd().X; x++) {
+                newBoard[y][x] = '.';
+            }
+        } else {
+            int x = pr.getStart().X;
+            for (int y = pr.getStart().Y; y <= pr.getEnd().Y; y++) {
+                newBoard[y][x] = '.';
+            }
+        }
+        newCars.remove(pr);
+        return new Board(newBoard, totalCost, this, newCars);
+    }
+
     public void debugBoard() {
         System.out.println("Board:");
         for (int i = 0; i < height; i++) {
@@ -290,6 +481,9 @@ public class Board {
             System.out.println();
         }
         System.out.println("Cost: " + totalCost);
+        System.out.println("Heuristik 1: " + heuristik());
+        System.out.println("Heuristik 2: " + heuristik_2());
+        System.out.println("Heuristik 3: " + heuristik_3());
         System.out.println("Exit: (" + exit.X + ", " + exit.Y + ")");
     }
 }
