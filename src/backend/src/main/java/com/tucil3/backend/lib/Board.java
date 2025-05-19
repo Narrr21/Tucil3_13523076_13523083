@@ -123,21 +123,15 @@ public class Board {
     }
 
     public int heuristik() {
-        Car target = null;
-        for (Car car : cars) {
-            if (car.getSymbol() == 'P') {
-                target = car;
-                break;
-            }
-        }
+        Car primary = getCarBySymbol('P');
 
-        if (target == null) return Integer.MAX_VALUE;
+        if (primary == null) return Integer.MAX_VALUE;
 
         int blocking = 0;
 
-        if (target.getDirection() == 'X') {
-            int y = target.getStart().Y;
-            int x = target.getEnd().X + 1;
+        if (primary.getDirection() == 'X') {
+            int y = primary.getStart().Y;
+            int x = primary.getEnd().X + 1;
 
             while (x < width) {
                 if (board[y][x] != '.') {
@@ -147,11 +141,11 @@ public class Board {
                 x++;
             }
 
-            return (exit.X - target.getEnd().X) + blocking;
+            return (exit.X - primary.getEnd().X) + blocking;
 
         } else { // direction == 'Y'
-            int x = target.getStart().X;
-            int y = target.getEnd().Y + 1;
+            int x = primary.getStart().X;
+            int y = primary.getEnd().Y + 1;
 
             while (y < height) {
                 if (board[y][x] != '.') {
@@ -161,30 +155,25 @@ public class Board {
                 y++;
             }
 
-            return (exit.Y - target.getEnd().Y) + blocking;
+            return (exit.Y - primary.getEnd().Y) + blocking;
         }
     }
 
     public int heuristik_2() {
-        Car target = null;
-        for (Car car : cars) {
-            if (car.getSymbol() == 'P') {
-                target = car;
-                break;
-            }
-        }
+        Car primary = getCarBySymbol('P');
 
-        if (target == null) return Integer.MAX_VALUE;
+        if (primary == null) return Integer.MAX_VALUE;
 
         int penalty = 0;
 
-        if (target.getDirection() == 'X') {
-            int y = target.getStart().Y;
-            int x = target.getEnd().X + 1;
+        if (primary.getDirection() == 'X') {
+            int y = primary.getStart().Y;
+            int x = primary.getEnd().X + 1;
 
             while (x < width) {
                 char cell = board[y][x];
-                if (cell != '.' && cell != target.getSymbol()) {
+                if (cell != '.' && cell != primary.getSymbol()) {
+                    // System.out.println(cell);
                     Car blocker = getCarBySymbol(cell);
 
                     if (canMove(blocker, 1) || canMove(blocker, -1)) {
@@ -199,12 +188,12 @@ public class Board {
             }
 
         } else {
-            int x = target.getStart().X;
-            int y = target.getEnd().Y + 1;
+            int x = primary.getStart().X;
+            int y = primary.getEnd().Y + 1;
 
             while (y < height) {
                 char cell = board[y][x];
-                if (cell != '.' && cell != target.getSymbol()) {
+                if (cell != '.' && cell != primary.getSymbol()) {
                     Car blocker = getCarBySymbol(cell);
 
                     if (canMove(blocker, 1) || canMove(blocker, -1)) {
@@ -219,15 +208,16 @@ public class Board {
             }
         }
 
-        int distanceToExit = (target.getDirection() == 'X') ?
-                (exit.X - target.getEnd().X) :
-                (exit.Y - target.getEnd().Y);
+        int distance = (primary.getDirection() == 'X') ?
+                (exit.X - primary.getEnd().X) :
+                (exit.Y - primary.getEnd().Y);
 
-        return distanceToExit + Math.abs(penalty);
+        return distance + Math.abs(penalty);
     }
 
     private Car getCarBySymbol(char symbol) {
         for (Car car : cars) {
+            // System.out.println(car.getSymbol());
             if (car.getSymbol() == symbol) {
                 return car;
             }
@@ -236,13 +226,7 @@ public class Board {
     }
 
     public int heuristik_3() {
-        Car primary = null;
-        for (Car car : cars) {
-            if (car.getSymbol() == 'P') {
-                primary = car;
-                break;
-            }
-        }
+        Car primary = getCarBySymbol('P');
         if (primary == null) return Integer.MAX_VALUE;
 
         Set<Character> level1Blockers = new HashSet<>();
@@ -267,8 +251,9 @@ public class Board {
                     path.addAll(getPath(blocker, -1));
 
                     for (Coor p : path) {
-                        p.debugCoor();
+                        // p.debugCoor();
                         char c = board[p.Y][p.X];
+                        // System.out.println(c);
                         if (c != '.' && c != blocker.getSymbol()) {
                             if (c == 'P') {return Integer.MAX_VALUE;}
                             level2Blockers.add(c);
@@ -288,9 +273,13 @@ public class Board {
 
         System.out.println("Level 1 blockers: " + level1Blockers);
         System.out.println("Level 2 blockers: " + level2Blockers);
+
+        int distance = (primary.getDirection() == 'X') ?
+            (exit.X - primary.getEnd().X) :
+            (exit.Y - primary.getEnd().Y);
         
         // Example scoring: level 1 blockers weighted more heavily than level 2 blockers
-        return level1Blockers.size() * 3 + level2Blockers.size();
+        return distance + level1Blockers.size() * 3 + level2Blockers.size();
     }
 
     public List<Coor> getPath(Car car, int step) {
@@ -307,13 +296,12 @@ public class Board {
             char cell = board[y][x];
 
             if (cell != '.' && cell != car.getSymbol()) {
-                // Tambahkan posisi penghalang ke path, supaya bisa dideteksi sebagai level 2 blocker
-                path.add(new Coor(x, y));
+                path.add(new Coor(y, x));
                 break;
             }
 
-            path.add(new Coor(x, y));
-            cursor = new Coor(x, y);
+            path.add(new Coor(y, x));
+            cursor = new Coor(y, x);
         }
 
         return path;
@@ -383,58 +371,52 @@ public class Board {
         } else {
             int x = newCar.getStart().X;
             for (int y = newCar.getStart().Y; y <= newCar.getEnd().Y; y++) {
+                // newCar.getStart().debugCoor();
+                // newCar.getEnd().debugCoor();
                 board[y][x] = newCar.getSymbol();
             }
         }
     }
 
     public boolean canMove(Car car, int step) {
-        if (step == 0) return true;
-
         Coor start = car.getStart();
         Coor end = car.getEnd();
+        char symbol = car.getSymbol();
         char direction = car.getDirection();
 
         if (direction == 'X') {
-            int y = start.Y;
+            int newStart = start.X + step;
+            int newEnd = end.X + step;
 
-            if (step > 0) {
-                // Cek sel setelah ujung kanan
-                for (int i = 1; i <= step; i++) {
-                    int newX = end.X + i;
-                    if (newX >= width || board[y][newX] != '.') return false;
-                }
-            } else {
-                // Cek sel sebelum ujung kiri
-                for (int i = 1; i <= -step; i++) {
-                    int newX = start.X - i;
-                    if (newX < 0 || board[y][newX] != '.') return false;
-                }
+            if (newStart < 0 || newEnd >= width) return false;
+
+            int y = start.Y;
+            int max = Math.max(newEnd, end.X);
+            int min = Math.min(newStart, start.X);
+
+            for (int i = min; i <= max; i++) {
+                if (board[y][i] != '.' && board[y][i] != symbol) return false;
             }
             return true;
 
         } else if (direction == 'Y') {
-            int x = start.X;
+            int newStart = start.Y + step;
+            int newEnd = end.Y + step;
 
-            if (step > 0) {
-                // Cek sel setelah ujung bawah
-                for (int i = 1; i <= step; i++) {
-                    int newY = end.Y + i;
-                    if (newY >= height || board[newY][x] != '.') return false;
-                }
-            } else {
-                // Cek sel sebelum ujung atas
-                for (int i = 1; i <= -step; i++) {
-                    int newY = start.Y - i;
-                    if (newY < 0 || board[newY][x] != '.') return false;
-                }
+            if (newStart < 0 || newEnd >= height) return false;
+
+            int x = start.X;
+            int max = Math.max(newEnd, end.Y);
+            int min = Math.min(newStart, start.Y);
+
+            for (int i = min; i <= max; i++) {
+                if (board[i][x] != '.' && board[i][x] != symbol) return false;
             }
             return true;
         }
 
-        return false;
+        return false; // invalid direction
     }
-
 
     public boolean equals(Board b) {
         if (b == null) return false;
