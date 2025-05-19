@@ -1,8 +1,8 @@
 export default function SizeForm({ setGridSize }) {
     const handleSubmit = (e) => {
         e.preventDefault();
-        const rows = e.target.rows.value;
-        const cols = e.target.cols.value;
+        const rows = Number(e.target.rows.value);
+        const cols = Number(e.target.cols.value);
         setGridSize({rows, cols});
     }   
 
@@ -16,14 +16,14 @@ export default function SizeForm({ setGridSize }) {
                 <input
                     type="number"
                     name="rows"
-                    placeholder={3}
+                    defaultValue={3}
                     className="w-1/2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <label className="text-sm font-medium">Columns</label>
                 <input
                     type="number"
                     name="cols"
-                    placeholder={3}
+                    defaultValue={3}
                     className="w-1/2 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
             </div>

@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 
@@ -14,9 +14,10 @@ export default function Board({
     occupiedCells,
     setOccupiedCells, 
     primaryPiece,
+    exit, 
+    setExit,
 }) {
     const sizeRef = useRef({rows, cols});
-    const [exit, setExit] = useState({exitRow: 1, exitCol: sizeRef.current.cols - 1});
     const occupiedCellsRef = useRef(occupiedCells);
     // const primaryPieceRef = useRef(primaryPiece);
 

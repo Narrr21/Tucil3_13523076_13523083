@@ -7,7 +7,6 @@ import PieceSpawner from "@/components/pieceSpawner";
 import PrimarySelector from "@/components/primarySelector";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { Router } from "next/router";
 
 export default function Home() {
   const router = useRouter();
@@ -16,11 +15,13 @@ export default function Home() {
   const [pieces, setPieces] = useState([]);
   const [occupiedCells, setOccupiedCells] = useState([]);
   const [orientation, setOrientation] = useState("horizontal");
+  const [exit, setExit] = useState({exitRow: 1, exitCol: Number(gridSize.cols) + 1});
+  
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
   const handleOnSubmit = (e) => {
     e.preventDefault();
-    const length = e.target.length.value;
+    const length = Number(e.target.length.value);
     let newPiece = { id: pieces.length + 1, length: length, orientation: orientation, x: 0, y: 0 };
     // Check if the piece can be placed on the board
     let placed = false;
@@ -61,11 +62,9 @@ export default function Home() {
         ...Array.from({ length }, (_, i) => ({
           x: newPiece.x + (orientation === "horizontal" ? i : 0),
           y: newPiece.y + (orientation === "vertical" ? i : 0),
-          pieceId: newPiece.id,
+          pieceId: Number(newPiece.id),
         })),
       ]);
-      // console.log("New piece placed: ", newPiece);
-      // console.log("Occupied cells: ", occupiedCells);
     }
     else if (pieces.length >= 25) {
       alert("Maximum number of pieces reached");
@@ -77,25 +76,31 @@ export default function Home() {
   useEffect(() => {
     setPieces([]);
     setOccupiedCells([]);
-  }, []);
+  }, [gridSize]);
 
   const submitBoard = () => {
+    if (!primaryPiece) {
+      alert("Please select a primary piece before submitting the board.");
+      return;
+    }
     const boardState = {
       gridSize,
       primaryPiece,
-      pieces,
+      occupiedCells,
+      exit,
     };
     const boardStateJson = JSON.stringify(boardState, null, 2);
     console.log(boardStateJson);
     // Send the board state to the server
-    axios.post(`${baseUrl}/api/board`, boardState)
+    axios.post(`${baseUrl}/board`, boardState)
       .then(response => {
         console.log("Board state sent to server:", response.data);
-        Router.push("/solution");
+        router.push("/solution");
       })
       .catch(error => {
         console.error("Error sending board state to server:", error);
       });
+
     console.log("url: ", baseUrl);
     alert("Board state compiled to JSON. Check the console for output.");
   };
@@ -111,6 +116,8 @@ export default function Home() {
           primaryPiece={primaryPiece}
           occupiedCells={occupiedCells}
           setOccupiedCells={setOccupiedCells}
+          exit={exit}
+          setExit={setExit}
         />
       </div>
       <div className="flex-col w-1/4 h-screen bg-gray-500 p-4">

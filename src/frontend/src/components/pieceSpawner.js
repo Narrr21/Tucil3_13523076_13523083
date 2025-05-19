@@ -14,7 +14,7 @@ export default function PieceSpawner({ handleOnSubmit, orientation, setOrientati
                     type="number"
                     name="length"
                     min={2}
-                    placeholder={2}
+                    defaultValue={2}
                     required
                     className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
