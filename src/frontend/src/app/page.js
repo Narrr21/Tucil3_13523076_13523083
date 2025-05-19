@@ -6,10 +6,8 @@ import { useEffect, useState } from "react";
 import PieceSpawner from "@/components/pieceSpawner";
 import PrimarySelector from "@/components/primarySelector";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const router = useRouter();
   const [gridSize, setGridSize] = useState({rows: 3, cols: 3});
   const [primaryPiece, setPrimaryPiece] = useState();
   const [pieces, setPieces] = useState([]);
@@ -78,31 +76,42 @@ export default function Home() {
     setOccupiedCells([]);
   }, [gridSize]);
 
-  const submitBoard = () => {
+  const submitBoard = async () => {
     if (!primaryPiece) {
       alert("Please select a primary piece before submitting the board.");
       return;
     }
+    const formattedExit = {
+      exitRow: exit.exitRow - 1,
+      exitCol: exit.exitCol - 1,
+    };
+    // Use formattedExit in boardState
     const boardState = {
       gridSize,
       primaryPiece,
       occupiedCells,
-      exit,
+      exit: formattedExit,
     };
     const boardStateJson = JSON.stringify(boardState, null, 2);
     console.log(boardStateJson);
-    // Send the board state to the server
-    axios.post(`${baseUrl}/board`, boardState)
-      .then(response => {
-        console.log("Board state sent to server:", response.data);
-        router.push("/solution");
-      })
-      .catch(error => {
-        console.error("Error sending board state to server:", error);
-      });
 
-    console.log("url: ", baseUrl);
-    alert("Board state compiled to JSON. Check the console for output.");
+    // Send the board state to the server
+    try {
+      const response = await axios.post(`${baseUrl}/board`, boardState, {
+        timeout: 30000, // Timeout in milliseconds 
+      });
+      if (response.data && response.data.solution) {
+        console.log("Solution:", response.data.solution);
+      } else {
+        console.log("Solution not found!");
+      }
+    } catch (error) {
+      if (error.code === "ECONNABORTED") {
+        console.error("Request timed out");
+      } else {
+        console.error("Error solving puzzle:", error);
+      }
+    }
   };
   
   return (

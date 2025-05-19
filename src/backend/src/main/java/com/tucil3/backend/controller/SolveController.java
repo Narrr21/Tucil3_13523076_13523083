@@ -74,20 +74,6 @@ public class SolveController {
         }
         int exitX = payload.exit.exitCol;
         int exitY = payload.exit.exitRow;
-        if (exitX == width + 1) {
-            exitX = exitX - 2;
-            exitY = exitY - 1;
-        }
-        else if (exitX == 0) {
-            exitY = exitY - 1;
-        }
-        else if (exitY == height + 1) {
-            exitY = exitY - 2;
-            exitX = exitX - 1;
-        }
-        else if (exitY == 0) {
-            exitX = exitX - 1;
-        }
         Coor exitCoor = new Coor(exitY, exitX);
         System.out.println("Exit: (" + exitCoor.X + ", " + exitCoor.Y + ")");
         Board board = new Board(grid, exitCoor);
@@ -95,12 +81,14 @@ public class SolveController {
         // Solve the board
         Solver solver = new Solver(board);
         List<Board> resultBoards = solver.solving("A*");
+        if (resultBoards == null) {
+            return ResponseEntity.ok("Solution not found!");
+        }
         for (Board b : resultBoards) {
             b.debugBoard();
         }
-
         // Return the result
-        return ResponseEntity.ok("Success!");
+        return ResponseEntity.ok(Map.of("solution", resultBoards));
     }
 
     @GetMapping("/api/hello")
