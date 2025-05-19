@@ -1,4 +1,4 @@
-package lib;
+package com.tucil3.backend.lib;
 public class Car {
     private final char symbol;
     private Coor start;

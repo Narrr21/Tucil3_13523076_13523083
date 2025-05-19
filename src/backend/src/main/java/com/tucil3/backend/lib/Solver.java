@@ -1,11 +1,11 @@
-package lib;
+package com.tucil3.backend.lib;
 import java.util.*;
 
 public class Solver {
-    private Board initialBoard;
+    private final Board initialBoard;
     private List<Board> visitedBoard;
-    private Random random = new Random();
-    public int heuristik = 1;
+    private final Random random = new Random();
+    public final int heuristik = 1;
 
     public Solver(Board initialBoard) {
         this.initialBoard = initialBoard;

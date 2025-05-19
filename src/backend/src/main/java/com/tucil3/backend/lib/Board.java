@@ -1,28 +1,75 @@
-package lib;
+package com.tucil3.backend.lib;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Board {
-    private char[][] board;
-    private int width;
-    private int height;
-    private int totalCost;
-    private Board parent;
-    private Coor exit;
-    private List<Car> cars;
+    private final char[][] board;
+    private final int width;
+    private final int height;
+    private final int totalCost;
+    private final Board parent;
+    private final Coor exit;
+    private final List<Car> cars;
 
-    public Board(char[][] board, int width, int height, int totalCost, Board parent, Coor exit, List<Car> cars) {
+    public Board(char[][] board, Coor exit) {
         this.board = deepCopyBoard(board);
-        this.width = width;
-        this.height = height;
+        this.width = board[0].length;
+        this.height = board.length;
+        this.exit = exit;
+        this.cars = new ArrayList<>();
+        // scan through horizontal cars
+        for (int i = 0; i < height; i++) {
+            char current = '.';
+            for (int j = 0; j < width; j++) {
+                if (board[i][j] != current) {
+                    current = board[i][j];
+                    int startX = j;
+                    while (j < width && board[i][j] == current) {
+                        j++;
+                    }
+                    if (j - startX > 1) {
+                        cars.add(new Car(current, new Coor(i, startX), new Coor(i, j - 1)));
+                    }
+                }
+            }
+        }
+
+        for (int j = 0; j < width; j++) {
+            char current = '.';
+            for (int i = 0; i < height; i++) {
+                if (board[i][j] != current) {
+                    current = board[i][j];
+                    int startY = i;
+                    while (i < height && board[i][j] == current) {
+                        i++;
+                    }
+                    if (i - startY > 1) {
+                        cars.add(new Car(current, new Coor(startY, j), new Coor(i - 1, j)));
+                    }
+                }
+            }
+        }
+
+        this.totalCost = 0;
+        this.parent = null;
+    }
+
+    public Board(char[][] board, int totalCost, Board parent, List<Car> cars) {
+        this.board = deepCopyBoard(board);
+        this.width = board[0].length;
+        this.height = board.length;
         this.totalCost = totalCost;
         this.parent = parent;
-        this.exit = exit;
-        this.cars = cars;
+        this.exit = parent.exit;
+        this.cars = deepCopyCars(cars);
     }
 
     public char[][] getBoard() {
         return deepCopyBoard(board);
+    }
+
+    public List<Car> getCars() {
+        return deepCopyCars(cars);
     }
 
     public int getCost() {
@@ -126,8 +173,8 @@ public class Board {
 
                 if (!canMove(car, step)) continue;
 
-                char[][] newBoard = deepCopyBoard(this.board);
-                List<Car> newCars = deepCopyCars(this.cars);
+                char[][] newBoard = this.getBoard();
+                List<Car> newCars = this.getCars();
 
                 Car movedCar = null;
                 Car oldCar = null;
@@ -144,7 +191,7 @@ public class Board {
 
                 updateBoard(newBoard, oldCar, movedCar);
 
-                Board childBoard = new Board(newBoard, width, height, totalCost + 1, this, exit, newCars);
+                Board childBoard = new Board(newBoard, totalCost + 1, this, newCars);
                 children.add(childBoard);
             }
         }
@@ -154,6 +201,7 @@ public class Board {
 
     private void updateBoard(char[][] board, Car oldCar, Car newCar) {
         // Clear old car
+        if (oldCar == null) return;
         if (oldCar.getDirection() == 'X') {
             int y = oldCar.getStart().Y;
             for (int x = oldCar.getStart().X; x <= oldCar.getEnd().X; x++) {

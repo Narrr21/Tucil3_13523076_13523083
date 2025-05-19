@@ -1,4 +1,4 @@
-package lib;
+package com.tucil3.backend.lib;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class Main {
         cars.add(new Car('M', new Coor(5, 3), new Coor(5, 4))); // horizontal
 
 
-        Board board = new Board(grid, width, height, 0, null, exit, cars);
+        Board board = new Board(grid, exit);
 
         System.out.println("Initial Board:");
         board.debugBoard();

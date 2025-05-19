@@ -1,4 +1,4 @@
-package lib;
+package com.tucil3.backend.lib;
 public class Coor {
     public int X;
     public int Y;
