@@ -17,6 +17,8 @@ public class Solver {
     }
 
     public List<Board> solving(String method, int heur) {
+        int numberVisit = 0;
+
         if (!validSetup()) {
             return null;
         }
@@ -57,6 +59,7 @@ public class Solver {
         q.add(initialBoard);
 
         while (!q.isEmpty()) {
+            numberVisit++;
             Board current = q.poll();
 
             if (isVisited(current)) continue;
@@ -64,6 +67,7 @@ public class Solver {
 
             if (current.isGoal()) {
                 System.out.println("Solution found!");
+                System.out.println("Board visited: " + numberVisit);
                 return buildPath(current);
             }
 
@@ -75,6 +79,7 @@ public class Solver {
         }
 
         System.out.println("No solution found.");
+        System.out.println("Board visited: " + numberVisit);
         return null;
     }
 
@@ -133,13 +138,17 @@ public class Solver {
     }
 
     private List<Board> simulatedAnnealing() {
+        int numberVisit = 0;
+
         Board current = initialBoard;
         double temperature = 1000.0;
         double coolingRate = 0.003;
 
         while (temperature > 1e-3) {
+            numberVisit++;
             if (current.isGoal()) {
-                System.out.println("Solution found with Simulated Annealing!");
+                System.out.println("Solution found!");
+                System.out.println("Board visited: " + numberVisit);
                 return buildPath(current);
             }
 
@@ -170,7 +179,8 @@ public class Solver {
             temperature *= (1 - coolingRate); // cooling
         }
 
-        System.out.println("No solution found using Simulated Annealing.");
+        System.out.println("No solution found.");
+        System.out.println("Board visited: " + numberVisit);
         return null;
     }
 
