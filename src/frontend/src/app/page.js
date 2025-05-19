@@ -4,23 +4,50 @@ import Board from "@/components/board";
 import SizeForm from "@/components/sizeForm";
 import { useEffect, useState } from "react";
 import PieceSpawner from "@/components/pieceSpawner";
-import PrimarySelector from "@/components/primarySelector";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import ResultModal from "@/components/resultModal";
+import TextFileUploadForm from "@/components/fileUpload";
 
 export default function Home() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [grids, setGrids] = useState([[[]]]);
+  const showResult = searchParams.get("showResult");
   const [gridSize, setGridSize] = useState({rows: 3, cols: 3});
+  const [refresh, setRefresh] = useState(false);
   const [primaryPiece, setPrimaryPiece] = useState();
   const [pieces, setPieces] = useState([]);
   const [occupiedCells, setOccupiedCells] = useState([]);
   const [orientation, setOrientation] = useState("horizontal");
   const [exit, setExit] = useState({exitRow: 1, exitCol: Number(gridSize.cols) + 1});
+  const [loading, setLoading] = useState(false);
   
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
-  const handleOnSubmit = (e) => {
+  useEffect(() => {
+    if (refresh) {
+      setPieces([]);
+      setOccupiedCells([]);
+      setPrimaryPiece(undefined);
+      setExit({exitRow: 1, exitCol: Number(gridSize.cols) + 1});
+      setRefresh(false);
+    }
+  }, [refresh]);
+
+  const handleAddPiece = (e) => {
     e.preventDefault();
     const length = Number(e.target.length.value);
-    let newPiece = { id: pieces.length + 1, length: length, orientation: orientation, x: 0, y: 0 };
+    let idIndex = pieces.length - 1;
+    if (idIndex >= 10) idIndex++; // Skip 'K'
+    if (idIndex >= 15) idIndex++; // Skip 'P'
+    if (pieces.length === 0 || primaryPiece === undefined) {
+      setPrimaryPiece(true);
+      idIndex = 15;
+    }
+    const id = String.fromCharCode(65 + idIndex);
+    let newPiece = { id: id, length: length, orientation: orientation, x: 0, y: 0 };
     // Check if the piece can be placed on the board
     let placed = false;
     for (let x = 0; x < gridSize.cols; x++) {
@@ -71,21 +98,16 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    setPieces([]);
-    setOccupiedCells([]);
-  }, [gridSize]);
-
   const submitBoard = async () => {
     if (!primaryPiece) {
       alert("Please select a primary piece before submitting the board.");
       return;
     }
+    setLoading(true);
     const formattedExit = {
       exitRow: exit.exitRow - 1,
       exitCol: exit.exitCol - 1,
     };
-    // Use formattedExit in boardState
     const boardState = {
       gridSize,
       primaryPiece,
@@ -94,16 +116,17 @@ export default function Home() {
     };
     const boardStateJson = JSON.stringify(boardState, null, 2);
     console.log(boardStateJson);
-
-    // Send the board state to the server
     try {
       const response = await axios.post(`${baseUrl}/board`, boardState, {
-        timeout: 30000, // Timeout in milliseconds 
+        timeout: 30000,
       });
-      if (response.data && response.data.solution) {
-        console.log("Solution:", response.data.solution);
+      if (response.data && response.data.boards) {
+        router.push("?showResult=true");
+        console.log("Solution found!");
+        console.log("Response data:", response.data.boards);
+        setGrids(response.data.boards);
       } else {
-        console.log("Solution not found!");
+        alert("Solution not found!");
       }
     } catch (error) {
       if (error.code === "ECONNABORTED") {
@@ -111,9 +134,10 @@ export default function Home() {
       } else {
         console.error("Error solving puzzle:", error);
       }
+    } finally {
+      setLoading(false);
     }
   };
-  
   return (
     <div className = "flex flex-row justify-between">
       <div className="flex-auto w-full h-screen justify-center px-10 py-10">
@@ -130,12 +154,14 @@ export default function Home() {
         />
       </div>
       <div className="flex-col w-1/4 h-screen bg-gray-500 p-4">
-        <SizeForm setGridSize={setGridSize}/>
-        <PieceSpawner handleOnSubmit={handleOnSubmit} orientation={orientation} setOrientation={setOrientation}/>
-        <PrimarySelector 
-          key={primaryPiece ? primaryPiece.id : "selector"} // Force re-render when primaryPiece changes
-          pieces={pieces} 
+        <SizeForm setGridSize={setGridSize} setRefresh={setRefresh}/>
+        <PieceSpawner handleOnSubmit={handleAddPiece} orientation={orientation} setOrientation={setOrientation}/>
+        <TextFileUploadForm
+          setGridSize={setGridSize}
+          setPieces={setPieces}
+          setOccupiedCells={setOccupiedCells}
           setPrimaryPiece={setPrimaryPiece}
+          setExit={setExit}
         />
         <button
           onClick={submitBoard}
@@ -144,6 +170,28 @@ export default function Home() {
           Solve!
         </button>
       </div>
+      <>
+        {loading && (
+          <div
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Solving puzzle"
+          >
+            <div className="bg-white p-8 rounded-lg shadow-lg flex flex-col items-center">
+              <span className="text-lg font-semibold mb-4">Solving, please wait...</span>
+              <div className="w-12 h-12 border-4 border-gray-300 border-t-red-500 rounded-full animate-spin"></div>
+            </div>
+          </div>
+        )}
+
+        {showResult && (
+          <ResultModal
+            boards={grids}
+            exit={exit}
+          />
+        )}
+      </>
     </div>
   );
 }

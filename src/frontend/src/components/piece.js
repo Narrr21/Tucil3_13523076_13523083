@@ -1,7 +1,25 @@
 import { useDrag } from "react-dnd";
 import * as motion from "motion/react-client"
 
-export default function Piece({ id, row, col, spanRow, spanCol, isPrimary}) {
+export default function Piece({ id, row, col, spanRow, spanCol, disableDrag}) {
+    const isPrimary = id === 'P';
+    const bg_color = isPrimary ? "bg-orange-400" : "bg-blue-500";
+    if (disableDrag) {
+        return (
+            <div
+                className={`z-10 ${bg_color} dynamic-grid-item rounded-md flex items-center justify-center text-center`}
+                style={{
+                    "--row": row,
+                    "--column": col,
+                    "--row-span": spanRow,
+                    "--column-span": spanCol,
+                }}
+            >
+                {id}
+            </div>
+        );
+    }
+
     const [{ isDragging }, drag] = useDrag(() => ({
         type: "piece",
         item: { id, row, col, spanRow, spanCol},
@@ -9,8 +27,6 @@ export default function Piece({ id, row, col, spanRow, spanCol, isPrimary}) {
             isDragging: !!monitor.isDragging(),
         }),
     }));
-
-    const bg_color = isPrimary ? "bg-orange-400" : "bg-blue-500";
 
     return (
         <motion.div 

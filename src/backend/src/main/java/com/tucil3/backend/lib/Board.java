@@ -21,34 +21,36 @@ public class Board {
         this.cars = new ArrayList<>();
         // scan through horizontal cars
         for (int i = 0; i < height; i++) {
-            char current = '.';
             for (int j = 0; j < width; j++) {
-                if (board[i][j] != current) {
-                    current = board[i][j];
-                    int startX = j;
-                    while (j < width && board[i][j] == current) {
-                        j++;
-                    }
-                    if (j - startX > 1) {
-                        cars.add(new Car(current, new Coor(i, startX), new Coor(i, j - 1)));
-                    }
+                if (board[i][j] == '.') {
+                    continue;
                 }
+                char current = board[i][j];
+                int startX = j;
+                do {
+                    j++;
+                } while (j < height && board[i][j] == current);
+                if (j - startX > 1) {
+                    cars.add(new Car(current, new Coor(i, startX), new Coor(i, j - 1)));
+                }
+                j--;
             }
         }
 
         for (int j = 0; j < width; j++) {
-            char current = '.';
             for (int i = 0; i < height; i++) {
-                if (board[i][j] != current) {
-                    current = board[i][j];
-                    int startY = i;
-                    while (i < height && board[i][j] == current) {
-                        i++;
-                    }
-                    if (i - startY > 1) {
-                        cars.add(new Car(current, new Coor(startY, j), new Coor(i - 1, j)));
-                    }
+                if (board[i][j] == '.') {
+                    continue;
                 }
+                char current = board[i][j];
+                int startY = i;
+                do {
+                    i++;
+                } while (i < height && board[i][j] == current);
+                if (i - startY > 1) {
+                    cars.add(new Car(current, new Coor(startY, j), new Coor(i - 1, j)));
+                }
+                i--;
             }
         }
 

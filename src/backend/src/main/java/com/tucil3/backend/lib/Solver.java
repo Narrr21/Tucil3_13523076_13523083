@@ -18,6 +18,7 @@ public class Solver {
 
     public List<Board> solving(String method, int heur) {
         if (!validSetup()) {
+            System.out.println("Invalid setup.");
             return null;
         }
         heuristik = heur;
@@ -62,6 +63,8 @@ public class Solver {
             if (isVisited(current)) continue;
             visitedBoard.add(current);
 
+            current.debugBoard();
+
             if (current.isGoal()) {
                 System.out.println("Solution found!");
                 return buildPath(current);
@@ -92,13 +95,16 @@ public class Solver {
         Coor pr = null;
         char direction = ' ';
         for (Car car: initialBoard.getCars()) {
+//            car.debugCar();
             if (car.getSymbol() == 'P') {
                 pr = car.getStart();
                 direction = car.getDirection();
                 break;
             }
         }
-        if (pr == null) {return false;}
+        if (pr == null) {
+            return false;
+        }
         if (direction == 'X') {
             if (!(ex.X == -1 || ex.X == initialBoard.getWidth())) {
                 return false;

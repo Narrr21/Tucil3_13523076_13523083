@@ -17,6 +17,6 @@ public class Coor {
     }
 
     public void debugCoor() {
-        System.out.println("Coord: (" + X + ", " + Y + ")");
+        System.out.println("Coord: (" + Y + ", " + X + ")");
     }
 }
