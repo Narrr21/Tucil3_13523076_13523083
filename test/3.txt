@@ -1,8 +1,9 @@
-6 6
-4
-..B...
-..B...
-AAB...K
-CCC..D
-.....D
-.....D
+6 6 
+13
+E.CGGG  
+E.CHHB  
+JJCIIB  
+FAAP..  
+FD.PLL  
+.DMMM.
+   K
