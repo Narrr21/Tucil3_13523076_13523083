@@ -122,7 +122,7 @@ export default function Home() {
     console.log(boardStateJson);
     try {
       const response = await axios.post(`${baseUrl}/board`, boardState, {
-        timeout: 30000, // 30 seconds timeout
+        timeout: 100000, // 100 seconds timeout
       });
       if (response.data && response.data.boards) {
         router.push("?showResult=true");
@@ -136,7 +136,8 @@ export default function Home() {
       }
     } catch (error) {
       if (error.code === "ECONNABORTED") {
-        console.error("Request timed out");
+        console.log("Request timed out");
+        alert("Request timed out. Execution time exceeded 100 seconds.");
       } else {
         console.error("Error solving puzzle:", error);
       }
