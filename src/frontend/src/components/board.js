@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useRef } from "react";
+import { use, useEffect, useRef } from "react";
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 
@@ -24,7 +24,7 @@ export default function Board({
     // Reset exit when rows or cols change
     useEffect(() => {
         if (disableDrag) return;
-        setExit({ exitRow: 1, exitCol: Number(cols) + 1 });
+        setExit({ exitRow: exit.exitRow, exitCol: exit.exitCol });
         sizeRef.current = { rows: Number(rows) + 2, cols: Number(cols) + 2 };
     }, [rows, cols]);
 
