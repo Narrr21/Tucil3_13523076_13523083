@@ -1,5 +1,5 @@
 "use client"
-import { use, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 
@@ -20,23 +20,17 @@ export default function Board({
 }) {
     const sizeRef = useRef({rows, cols});
     const occupiedCellsRef = useRef(occupiedCells);
-    // const primaryPieceRef = useRef(primaryPiece);
 
     // Reset exit when rows or cols change
     useEffect(() => {
         if (disableDrag) return;
         setExit({ exitRow: 1, exitCol: Number(cols) + 1 });
         sizeRef.current = { rows: Number(rows) + 2, cols: Number(cols) + 2 };
-        // console.log("Rows: ", Number(rows) + 2, "Cols: ", Number(cols) + 2);
-        // console.log("Exit: ", { exitRow: 1, exitCol: Number(cols) + 1 });
     }, [rows, cols]);
 
     useEffect(() => {
         occupiedCellsRef.current = occupiedCells;
     }, [occupiedCells]);
-
-    // Update primaryPieceRef immediately when primaryPiece changes
-    // primaryPieceRef.current = primaryPiece;
 
     function renderPieces() {
         return pieces.map(piece => {
@@ -79,7 +73,7 @@ export default function Board({
                 targetRow > newRows - 1 ||
                 targetCol > newCols - 1
             ) return false;
-            // Boundary checks...
+            // Boundary checks
             if (orientation === "horizontal") {
                 if (targetCol + pieceLength > newCols - 2) return false;
                 if (targetRow >= newRows - 2) return false;
@@ -153,7 +147,7 @@ export default function Board({
                 (row === newRows - 1 && col === 0) ||                      // bottom-left
                 (row === newRows - 1 && col === newCols - 1);              // bottom-right
 
-            const isExit = index === newCols * exitRow + exitCol; // customize box in the middle (optional)
+            const isExit = index === newCols * exitRow + exitCol; 
 
             const isEdge =
                 !isCorner && (

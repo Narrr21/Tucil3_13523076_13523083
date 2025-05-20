@@ -34,11 +34,16 @@ public class SolveController {
         public int exitRow;
     }
 
+    public static class Heuristic {
+        public int heur;
+        public String pathfinding;
+    }
+
     public static class RequestPayload {
         public GridSize gridSize;
         public List<OccupiedCells> occupiedCells;
         public Exit exit;
-        public int primaryPiece;
+        public Heuristic heuristics;
     }
 
     @PostMapping("/api/board")
@@ -56,18 +61,7 @@ public class SolveController {
         }
 
         for (OccupiedCells cell : payload.occupiedCells) {
-            char id = (char) ((cell.pieceId - 1) + 'A');
-            if (cell.pieceId == payload.primaryPiece) {
-                id = 'P';
-            } else {
-                if (id >= 'K') {
-                    id = (char) (id + 1);
-                }
-                if (id == 'P') {
-                    id = (char) (payload.primaryPiece - 1 + 'A');
-                }
-            }
-            grid[cell.y][cell.x] = id;
+            grid[cell.y][cell.x] = cell.pieceId;
         }
 
         for (int i = 0; i < height; i++) {
