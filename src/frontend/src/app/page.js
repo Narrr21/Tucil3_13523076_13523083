@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import ResultModal from "@/components/resultModal";
 import TextFileUploadForm from "@/components/fileUpload";
+import AlgorithmSelector from "@/components/algoSelect";
 
 export default function Home() {
   const searchParams = useSearchParams();
@@ -98,9 +99,9 @@ export default function Home() {
     }
   };
 
-  const submitBoard = async () => {
+  const submitBoard = async (selectedHeuristic) => {
     if (!primaryPiece) {
-      alert("Please select a primary piece before submitting the board.");
+      alert("Board must contain a primary piece");
       return;
     }
     setLoading(true);
@@ -113,6 +114,7 @@ export default function Home() {
       primaryPiece,
       occupiedCells,
       exit: formattedExit,
+      heuristics: selectedHeuristic,
     };
     const boardStateJson = JSON.stringify(boardState, null, 2);
     console.log(boardStateJson);
@@ -163,12 +165,9 @@ export default function Home() {
           setPrimaryPiece={setPrimaryPiece}
           setExit={setExit}
         />
-        <button
-          onClick={submitBoard}
-          className="w-full bg-red-500 text-white rounded-lg p-2 hover:bg-red-600 transition duration-200"
-        >
-          Solve!
-        </button>
+        <AlgorithmSelector 
+          submitBoard={submitBoard}
+        />
       </div>
       <>
         {loading && (

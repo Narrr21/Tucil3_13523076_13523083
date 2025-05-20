@@ -1,12 +1,10 @@
 "use client"
 
-import { useState } from "react";
-
 export default function PieceSpawner({ handleOnSubmit, orientation, setOrientation }) {
     return (
         <form
             onSubmit={handleOnSubmit}
-            className="my-10 flex flex-col gap-4"
+            className="my-2 flex flex-col gap-4 bg-white text-black p-4 rounded-lg shadow-md"
         >
             <div className="flex flex-row gap-2 w-1/2">
                 <label className="text-sm font-medium">Length</label>
