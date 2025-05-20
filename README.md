@@ -25,7 +25,7 @@ Program ini adalah aplikasi solver untuk permainan puzzle "Rush Hour", menggunak
 
 ## Usage
 
-1. Install dependencies and run each server:
+1. Install dependencies dan jalankan kedua server:
 
     Frontend:
     ```bash
@@ -39,10 +39,10 @@ Program ini adalah aplikasi solver untuk permainan puzzle "Rush Hour", menggunak
     cd ./src/backend
     ./mvnw spring-boot:run
     ```
-
-2. Atur papan permainan atau unggah file .txt yang berisi konfigurasi papan.
-3. Pilih algoritma penyelesaian.
-4. Klik tombol Solve dan tunggu hingga solusi ditemukan.
+2. Kunjungi http://localhost:3000 pada web browser.
+3. Atur papan permainan atau unggah file .txt yang berisi konfigurasi papan.
+4. Pilih algoritma penyelesaian.
+5. Klik tombol Solve dan tunggu hingga solusi ditemukan.
 
 ## Authors
 
