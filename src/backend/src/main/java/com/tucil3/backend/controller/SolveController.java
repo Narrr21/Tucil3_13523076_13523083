@@ -46,6 +46,18 @@ public class SolveController {
         public Heuristic heuristics;
     }
 
+    public static class ResponsePayload {
+        public List<Board> boards;
+        public int executionTime;
+        public int moveCount;
+
+        public ResponsePayload(List<Board> boards, int executionTime, int moveCount) {
+            this.boards = boards;
+            this.executionTime = executionTime;
+            this.moveCount = moveCount;
+        }
+    }
+
     @PostMapping("/api/board")
     public ResponseEntity<?> solveBoard(@RequestBody RequestPayload payload) {
         // Convert the request payload to the format needed by the solver
@@ -87,7 +99,7 @@ public class SolveController {
             b.debugBoard();
         }
         // Return the result
-        return ResponseEntity.ok(Map.of("boards", resultBoards));
+        return ResponseEntity.ok(new ResponsePayload(resultBoards, solver.executionTime, solver.moveCount));
     }
 
     @GetMapping("/api/hello")

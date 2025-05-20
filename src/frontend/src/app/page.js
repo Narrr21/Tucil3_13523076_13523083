@@ -15,6 +15,8 @@ export default function Home() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [grids, setGrids] = useState([[[]]]);
+  const [executionTime, setExecutionTime] = useState(0);
+  const [moveCount, setMoveCount] = useState(0);
   const showResult = searchParams.get("showResult");
   const [gridSize, setGridSize] = useState({rows: 3, cols: 3});
   const [refresh, setRefresh] = useState(false);
@@ -120,13 +122,15 @@ export default function Home() {
     console.log(boardStateJson);
     try {
       const response = await axios.post(`${baseUrl}/board`, boardState, {
-        timeout: 30000,
+        timeout: 30000, // 30 seconds timeout
       });
       if (response.data && response.data.boards) {
         router.push("?showResult=true");
         console.log("Solution found!");
         console.log("Response data:", response.data.boards);
         setGrids(response.data.boards);
+        setExecutionTime(response.data?.executionTime || 0);
+        setMoveCount(response.data?.moveCount || 0);
       } else {
         alert("Solution not found!");
       }
@@ -188,6 +192,8 @@ export default function Home() {
           <ResultModal
             boards={grids}
             exit={exit}
+            executionTime={executionTime}
+            moveCount={moveCount}
           />
         )}
       </>
