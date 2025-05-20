@@ -1,9 +1,10 @@
-export default function SizeForm({ setGridSize }) {
+export default function SizeForm({ setGridSize, setRefresh }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         const rows = Number(e.target.rows.value);
         const cols = Number(e.target.cols.value);
         setGridSize({rows, cols});
+        setRefresh(true);
     }   
 
     return (

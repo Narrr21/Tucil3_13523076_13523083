@@ -84,15 +84,16 @@ public class SolveController {
 
         // Solve the board
         Solver solver = new Solver(board);
-        List<Board> resultBoards = solver.solving("A*", 3);
+        List<Board> resultBoards = solver.solving("A*", 1);
         if (resultBoards == null) {
+            System.out.println("No solution found!");
             return ResponseEntity.ok("Solution not found!");
         }
         for (Board b : resultBoards) {
             b.debugBoard();
         }
         // Return the result
-        return ResponseEntity.ok(Map.of("solution", resultBoards));
+        return ResponseEntity.ok(Map.of("boards", resultBoards));
     }
 
     @GetMapping("/api/hello")

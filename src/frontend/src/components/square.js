@@ -2,8 +2,23 @@
 
 import { useDrop } from "react-dnd";
 
-export default function Square({ pieceId, style, children, setExit, row, col, onDrop, canPlacePiece, isEdge }) {
-    
+export default function Square({ style, children, setExit, row, col, onDrop, canPlacePiece, isEdge, disableDrag }) {
+    if (disableDrag) {
+        return (
+            <div className={`${style} z-0`} 
+                style={{
+                    "--row": Number(row) + 1,
+                    "--column": Number(col) + 1,
+                    "--row-span": 1,
+                    "--column-span": 1,
+                }}
+            >
+                {children}
+            </div>
+        );
+    }
+
+
     const onClick = (e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -25,7 +40,7 @@ export default function Square({ pieceId, style, children, setExit, row, col, on
     const borderStyle = isOver && canDrop ? "border-2 border-green-500" : canDrop ? "border-2 border-blue-500" : "border-2 border-gray-300";
 
     return (
-        <div className={`${style} ${borderStyle} ${pieceId ? 'occupied' : ''} z-0`} 
+        <div className={`${style} ${borderStyle} z-0`} 
             ref={drop}
             onClick={onClick}
             style={{

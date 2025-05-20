@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useRef } from "react";
+import { use, useEffect, useRef } from "react";
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 
@@ -16,6 +16,7 @@ export default function Board({
     primaryPiece,
     exit, 
     setExit,
+    disableDrag = false,
 }) {
     const sizeRef = useRef({rows, cols});
     const occupiedCellsRef = useRef(occupiedCells);
@@ -23,6 +24,7 @@ export default function Board({
 
     // Reset exit when rows or cols change
     useEffect(() => {
+        if (disableDrag) return;
         setExit({ exitRow: 1, exitCol: Number(cols) + 1 });
         sizeRef.current = { rows: Number(rows) + 2, cols: Number(cols) + 2 };
         // console.log("Rows: ", Number(rows) + 2, "Cols: ", Number(cols) + 2);
@@ -53,55 +55,59 @@ export default function Board({
                     spanCol={spanCol}
                     id={piece.id}
                     isPrimary={isPrimary}
+                    disableDrag={disableDrag}
                     // onDragStart={handleDragStart}
                 />
             );
         });
     };
     
-    const canPlacePiece = (piece, targetRow, targetCol) => {
-        const currentOccupied = occupiedCellsRef.current;
-        const pieceLength = Math.max(piece.spanRow, piece.spanCol);
-        const orientation = piece.spanCol > 1 ? "horizontal" : "vertical";
-        const newRows = sizeRef.current.rows;
-        const newCols = sizeRef.current.cols;
-        // Disallow placing on edge cells
-        // console.log("Target: ", { targetRow, targetCol });
-        // console.log("New Rows: ", newRows, "New Cols: ", newCols);
-        if (
-            targetRow < 0 ||
-            targetCol < 0 ||
-            targetRow > newRows - 1 ||
-            targetCol > newCols - 1
-        ) return false;
-        // Boundary checks...
-        if (orientation === "horizontal") {
-            if (targetCol + pieceLength > newCols - 2) return false;
-            if (targetRow >= newRows - 2) return false;
-        } else {
-            if (targetRow + pieceLength > newRows - 2) return false;
-            if (targetCol >= newCols - 2) return false;
-        }
-
-        // Collision check with latest occupiedCells
-        for (let i = 0; i < pieceLength; i++) {
-            const checkX = orientation === "horizontal" ? targetCol + i : targetCol;
-            const checkY = orientation === "vertical" ? targetRow + i : targetRow;
-            // console.log("Check: ", { checkX, checkY });
-            // console.log("Occupied Cells: ", currentOccupied);
-            if (currentOccupied.some(cell => 
-                cell.x === checkX && 
-                cell.y === checkY &&
-                cell.pieceId !== piece.id
-            )) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     function renderCells() {
+        const canPlacePiece = (piece, targetRow, targetCol) => {
+            if (disableDrag) return false;
+            const currentOccupied = occupiedCellsRef.current;
+            const pieceLength = Math.max(piece.spanRow, piece.spanCol);
+            const orientation = piece.spanCol > 1 ? "horizontal" : "vertical";
+            const newRows = sizeRef.current.rows;
+            const newCols = sizeRef.current.cols;
+            // Disallow placing on edge cells
+            // console.log("Target: ", { targetRow, targetCol });
+            // console.log("New Rows: ", newRows, "New Cols: ", newCols);
+            if (
+                targetRow < 0 ||
+                targetCol < 0 ||
+                targetRow > newRows - 1 ||
+                targetCol > newCols - 1
+            ) return false;
+            // Boundary checks...
+            if (orientation === "horizontal") {
+                if (targetCol + pieceLength > newCols - 2) return false;
+                if (targetRow >= newRows - 2) return false;
+            } else {
+                if (targetRow + pieceLength > newRows - 2) return false;
+                if (targetCol >= newCols - 2) return false;
+            }
+
+            // Collision check with latest occupiedCells
+            for (let i = 0; i < pieceLength; i++) {
+                const checkX = orientation === "horizontal" ? targetCol + i : targetCol;
+                const checkY = orientation === "vertical" ? targetRow + i : targetRow;
+                // console.log("Check: ", { checkX, checkY });
+                // console.log("Occupied Cells: ", currentOccupied);
+                if (currentOccupied.some(cell => 
+                    cell.x === checkX && 
+                    cell.y === checkY &&
+                    cell.pieceId !== piece.id
+                )) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+
         function handleDrop(piece, targetRow, targetCol) {
+            if (disableDrag) return;
             if (!canPlacePiece(piece, targetRow, targetCol)) return;
             
             // Update piece position
@@ -129,8 +135,6 @@ export default function Board({
 
                 return [...filteredCells, ...newCells];
             });
-            
-            // console.log("Piece Dropped: ", piece);
         }
 
         const Squares = [];
@@ -179,6 +183,7 @@ export default function Board({
                     onDrop={handleDrop}
                     canPlacePiece={canPlacePiece}
                     isEdge={isEdge}
+                    disableDrag={disableDrag}
                 >
                     {content}
                 </Square>
@@ -187,7 +192,6 @@ export default function Board({
         return Squares;
     }
 
-    // Re-render pieces if primaryPiece changes by using a key on the container
     return (
         <DndProvider backend={HTML5Backend}>
             <div 
