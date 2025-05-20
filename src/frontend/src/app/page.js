@@ -27,7 +27,7 @@ export default function Home() {
   const [exit, setExit] = useState({exitRow: 1, exitCol: Number(gridSize.cols) + 1});
   const [loading, setLoading] = useState(false);
   
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
   useEffect(() => {
     if (refresh) {
