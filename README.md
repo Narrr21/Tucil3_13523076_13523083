@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Tucil3_13523076_13523083
 
-## Getting Started
+## Description
 
-First, run the development server:
+Program ini adalah aplikasi solver untuk permainan puzzle "Rush Hour". 
 
+This project is a solution for the third individual assignment (Tucil 3) of the course "Strategi Algoritma" at ITB. It implements algorithms to solve the given problem efficiently.
+
+## Features
+
+- Implementation of required algorithms
+- Command-line interface for input and output
+- Well-documented code
+
+## Requirements
+
+- Node.js v18.18.0 or higher
+- Java v21 or higher
+
+## Usage
+
+1. Install dependencies and run each server:
+
+For Node.js:
 ```bash
+cd ./src/frontend
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+For Java (using Maven):
+```bash
+cd ./src/backend
+./mvnw spring-boot:run
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+2. Setup the board or upload a .txt file containing the board setup.
+3. Select the solving algorithm.
+4. Click the Solve button and wait for the solution.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Authors
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 13523076 - [Nadhif Al Rozin]
+- 13523083 - [David Bakti Lodianto]
