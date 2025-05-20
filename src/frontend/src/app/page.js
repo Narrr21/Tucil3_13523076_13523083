@@ -88,7 +88,7 @@ export default function Home() {
         ...Array.from({ length }, (_, i) => ({
           x: newPiece.x + (orientation === "horizontal" ? i : 0),
           y: newPiece.y + (orientation === "vertical" ? i : 0),
-          pieceId: Number(newPiece.id),
+          pieceId: newPiece.id,
         })),
       ]);
     }
