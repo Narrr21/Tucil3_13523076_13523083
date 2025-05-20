@@ -25,9 +25,9 @@ export default function TextFileUploadForm(
             let exit = undefined;
             if (lines.length === rows + 3) {
                 if (lines[2].includes('K')) {
-                    exit = { exitRow: 0, exitCol: lines[2].indexOf('K')};
+                    exit = { exitRow: 0, exitCol: lines[2].indexOf('K') + 1};
                 } else if (lines[lines.length - 1].includes('K')) {
-                    exit = { exitRow: rows + 1, exitCol: lines[lines.length - 1].indexOf('K')};
+                    exit = { exitRow: rows + 1, exitCol: lines[lines.length - 1].indexOf('K') + 1};
                 }
             }
             else if (lines.length < rows + 2) {
@@ -38,13 +38,15 @@ export default function TextFileUploadForm(
             const occupiedCells = [];
             const pieceIdMap = new Map();
             let primaryPiece = undefined;
+            const rowSkip = (lines[2].includes('K')) ? 3 : 2;
             // scan through the horizontal pieces
-            for (let i = 2; i < rows + 2; i++) {
+            for (let i = rowSkip; i < rows + rowSkip; i++) {
                 if (!exit && lines[i].includes('K')) {
                     exit = ({ exitRow: i - 1, exitCol: (lines[i].indexOf('K') === 0) ? 0 : (lines[i].indexOf('K') + 1)});
                 }
                 for (let j = 0; j < lines[i].length; j++) {
                     if (lines[i].length !== cols && lines[i].length !== cols + 1) {
+                        console.log("Invalid number of columns in input file. Got: ", lines[i].length, "Expected: ", cols);
                         throw new Error("Invalid number of columns in input file.");
                     }
                     const cell = lines[i].charAt(j);
@@ -67,7 +69,7 @@ export default function TextFileUploadForm(
                     const piece = {
                         id: cell,
                         x: currentJ,
-                        y: i - 2,
+                        y: i - rowSkip,
                         orientation: 'horizontal',
                         length: length,
                     };
@@ -79,7 +81,7 @@ export default function TextFileUploadForm(
                     for (let k = 0; k < length; k++) {
                         occupiedCells.push({
                             x: currentJ + k,
-                            y: i - 2,
+                            y: i - rowSkip,
                             pieceId: cell,
                         });
                     }
@@ -87,7 +89,7 @@ export default function TextFileUploadForm(
             }
             const extraCol = exit?.exitCol === 0 ? 1 : 0;
             for (let j = 0; j < cols + extraCol; j++) {
-                for (let i = 2; i < rows + 2; i++) {
+                for (let i = rowSkip; i < rows + rowSkip; i++) {
                     const cell = lines[i].charAt(j);
                     if (cell === '.' || cell === 'K' || cell === ' ' || cell === '\r') {
                         continue;
@@ -108,7 +110,7 @@ export default function TextFileUploadForm(
                     const piece = {
                         id: cell,
                         x: j,
-                        y: currentI - 2,
+                        y: currentI - rowSkip,
                         orientation: 'vertical',
                         length: length,
                     };
@@ -119,7 +121,7 @@ export default function TextFileUploadForm(
                     for (let k = 0; k < length; k++) {
                         occupiedCells.push({
                             x: j,
-                            y: currentI + k - 2,
+                            y: currentI + k - rowSkip,
                             pieceId: cell,
                         });
                     }
