@@ -10,7 +10,7 @@ public class Solver {
     private List<Board> visitedBoard;
     private final Random random = new Random();
     public int heuristik = 1;
-    public int numberVisit = 0;
+    public int moveCount = 0;
     public int runtime = 0;
     
 
@@ -66,7 +66,7 @@ public class Solver {
         q.add(initialBoard);
 
         while (!q.isEmpty()) {
-            numberVisit++;
+            moveCount++;
             Board current = q.poll();
 
             if (isVisited(current)) continue;
@@ -76,7 +76,7 @@ public class Solver {
 
             if (current.isGoal()) {
                 System.out.println("Solution found!");
-                System.out.println("Board visited: " + numberVisit);
+                System.out.println("Board visited: " + moveCount);
 
                 runtime = (int)((System.nanoTime() - startTime) / 1_000_000);
                 System.out.println("Time taken: " + runtime + " ms");
@@ -91,7 +91,7 @@ public class Solver {
         }
 
         System.out.println("No solution found.");
-        System.out.println("Board visited: " + numberVisit);
+        System.out.println("Board visited: " + moveCount);
 
         runtime = (int)((System.nanoTime() - startTime) / 1_000_000);
         System.out.println("Time taken: " + runtime + " ms");
@@ -156,17 +156,17 @@ public class Solver {
     }
 
     private List<Board> simulatedAnnealing() {
-        int numberVisit = 0;
+        int moveCount = 0;
 
         Board current = initialBoard;
         double temperature = 1000.0;
         double coolingRate = 0.003;
 
         while (temperature > 1e-3) {
-            numberVisit++;
+            moveCount++;
             if (current.isGoal()) {
                 System.out.println("Solution found!");
-                System.out.println("Board visited: " + numberVisit);
+                System.out.println("Board visited: " + moveCount);
                 return buildPath(current);
             }
 
@@ -198,7 +198,7 @@ public class Solver {
         }
 
         System.out.println("No solution found.");
-        System.out.println("Board visited: " + numberVisit);
+        System.out.println("Board visited: " + moveCount);
         return null;
     }
 
