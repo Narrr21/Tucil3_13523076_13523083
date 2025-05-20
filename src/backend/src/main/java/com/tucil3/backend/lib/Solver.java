@@ -10,6 +10,9 @@ public class Solver {
     private List<Board> visitedBoard;
     private final Random random = new Random();
     public int heuristik = 1;
+    public int numberVisit = 0;
+    public int runtime = 0;
+    
 
     public Solver(Board initialBoard) {
         this.initialBoard = initialBoard;
@@ -17,7 +20,7 @@ public class Solver {
     }
 
     public List<Board> solving(String method, int heur) {
-        int numberVisit = 0;
+        long startTime = System.nanoTime();
 
         if (!validSetup()) {
             System.out.println("Invalid setup.");
@@ -26,7 +29,10 @@ public class Solver {
         heuristik = heur;
 
         if (method.equalsIgnoreCase("SA")) {
-            return simulatedAnnealing();
+            List<Board> result = simulatedAnnealing();
+            runtime = (int)((System.nanoTime() - startTime) / 1_000_000);
+            System.out.println("Time taken: " + runtime + " ms");
+            return result;
         }
 
         PriorityQueue<Board> q;
@@ -66,11 +72,14 @@ public class Solver {
             if (isVisited(current)) continue;
             visitedBoard.add(current);
 
-            current.debugBoard();
+            // current.debugBoard();
 
             if (current.isGoal()) {
                 System.out.println("Solution found!");
                 System.out.println("Board visited: " + numberVisit);
+
+                runtime = (int)((System.nanoTime() - startTime) / 1_000_000);
+                System.out.println("Time taken: " + runtime + " ms");
                 return buildPath(current);
             }
 
@@ -83,6 +92,9 @@ public class Solver {
 
         System.out.println("No solution found.");
         System.out.println("Board visited: " + numberVisit);
+
+        runtime = (int)((System.nanoTime() - startTime) / 1_000_000);
+        System.out.println("Time taken: " + runtime + " ms");
         return null;
     }
 
