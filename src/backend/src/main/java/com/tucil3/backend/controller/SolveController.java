@@ -87,8 +87,11 @@ public class SolveController {
         Board board = new Board(grid, exitCoor);
 
         // Solve the board
+        String pathfinding = payload.heuristics.pathfinding;
+        int heur = payload.heuristics.heur;
+
         Solver solver = new Solver(board);
-        List<Board> resultBoards = solver.solving("A*", 1);
+        List<Board> resultBoards = solver.solving(pathfinding, heur);
         if (resultBoards == null) {
             System.out.println("No solution found!");
             return ResponseEntity.ok("Solution not found!");
