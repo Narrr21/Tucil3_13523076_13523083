@@ -9,7 +9,7 @@ public class Board {
     private final int width;
     private final int height;
     private final int totalCost;
-    private final Board parent;
+    private Board parent;
     private Coor exit;
     private final List<Car> cars;
 
@@ -64,6 +64,10 @@ public class Board {
 
     public void setExit(Coor ex) {
         this.exit = ex;
+    }
+
+    public void setParent(Board par) {
+        this.parent = par;
     }
 
     public Board(char[][] board, int totalCost, Board parent, List<Car> cars) {
@@ -273,8 +277,8 @@ public class Board {
             }
         }
 
-        System.out.println("Level 1 blockers: " + level1Blockers);
-        System.out.println("Level 2 blockers: " + level2Blockers);
+        // System.out.println("Level 1 blockers: " + level1Blockers);
+        // System.out.println("Level 2 blockers: " + level2Blockers);
 
         int distance = (primary.getDirection() == 'X') ?
             (exit.X - primary.getEnd().X) :

@@ -156,14 +156,18 @@ public class Solver {
     }
 
     private List<Board> simulatedAnnealing() {
-        int moveCount = 0;
+        moveCount = 0;
 
         Board current = initialBoard;
         double temperature = 1000.0;
         double coolingRate = 0.003;
 
-        while (temperature > 1e-3) {
+        while (temperature > 1e-9) {
             moveCount++;
+            // current.debugBoard();
+            if (!isVisited(current)) {
+                visitedBoard.add(current);
+            }
             if (current.isGoal()) {
                 System.out.println("Solution found!");
                 System.out.println("Board visited: " + moveCount);
@@ -173,7 +177,26 @@ public class Solver {
             List<Board> children = current.generateChild();
             if (children.isEmpty()) break;
 
-            Board next = randomChild(children);
+            Board next = null;
+            while (!children.isEmpty()) {
+                next = randomChild(children);
+                children.remove(next);
+
+                if (!isVisited(next) && next.getCost() <= 900) {
+                    break; // valid candidate
+                }
+
+                next = null; // reset so we can check later
+            }
+
+            // If no valid child was found, backtrack
+            if (next == null) {
+                if (current.getParent() == null) {
+                    return null;
+                }
+                current = current.getParent();
+                continue;
+            }
             int delta;
             switch (heuristik) {
                 case 1 -> delta = current.heuristik() - next.heuristik();
@@ -187,7 +210,8 @@ public class Solver {
 
             if (delta > 0) {
                 current = next;
-            } else {
+            } 
+            else {
                 double probability = Math.exp(delta / temperature);
                 if (random.nextDouble() < probability) {
                     current = next;
@@ -203,6 +227,7 @@ public class Solver {
     }
 
     private Board randomChild(List<Board> children) {
+        if (children.isEmpty()) {return null;}
         return children.get(random.nextInt(children.size()));
     }
 }
